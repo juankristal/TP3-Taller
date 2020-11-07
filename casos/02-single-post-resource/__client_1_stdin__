@@ -1,0 +1,15 @@
+POST /test HTTP/1.1
+User-Agent: Wget/1.20.3 (linux-gnu)
+Accept: */*
+Accept-Encoding: identity
+Host: localhost:8088
+Content-Length: 90
+Connection: Keep-Alive
+
+<!DOCTYPE html>
+<html>
+	<head></head>
+	<body>
+		<h1>Mi recurso test</h1>
+	</body>
+</html>

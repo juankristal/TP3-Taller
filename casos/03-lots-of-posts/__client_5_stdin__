@@ -1,0 +1,12 @@
+POST /other HTTP/1.1
+User-Agent: Wget/1.20.3 (linux-gnu)
+Accept: */*
+Content-Length: 91
+
+<!DOCTYPE html>
+<html>
+	<head></head>
+	<body>
+		<h1>Mi recurso other</h1>
+	</body>
+</html>
