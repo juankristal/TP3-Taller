@@ -2,11 +2,17 @@
 #include "Peer.h"
 
 Server::Server(char* port, char* root_file):
-	skt(port){
+	skt(port),
+	must_reap(false){
 		std::stringstream ss;
 		std::ifstream input(root_file);
 		while(input >> ss.rdbuf()){}
-		map[root_file] = str(ss);
+		map[root_file] = ss.str();
+}
+
+void _reap(){
+	std::unique_lock<std::mutex> lock(this->m);
+	this->must_reap = false;
 }
 
 void Server::run(){
@@ -15,11 +21,12 @@ void Server::run(){
 
 void Server::operator()(){
 
-	while(true){
+	while(accepting_connections){
 
 		// realizar manejo de peer
-
-		_reap();
+		if (must_reap){
+			_reap();
+		}
 	}
 
 	for (int i = 0; i < peers.size(); i++){
@@ -38,6 +45,9 @@ std::string Server::read_resource(std::string resourse){
 	return map[resourse];
 }
 
-Server::~Server(){
-	this.join();
+void Server::shutdown(){
+	this->accepting_connections = false;
+	this.join()
 }
+
+Server::~Server(){}

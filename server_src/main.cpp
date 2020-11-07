@@ -9,14 +9,14 @@
 int main(int argc, char const *argv[]){
 
 	if (argc != ARGV_LENGHT) return -1;
-
-	Server server(argv[PORT], argv[ROOT_FILE]);
 	try {
+		Server server(argv[PORT], argv[ROOT_FILE]);
 		server();
-	} catch (NetworkError &e){
+		while(std::cin.getline() != 'q'){}
+		server.shutdown();
+		return 0;
+	} catch (NetworkError &e) {
 		std::cerr << e.what();
 		return 1;
 	}
-	while(std::cin.getline() != 'q'){}
-	return 0;
 }
