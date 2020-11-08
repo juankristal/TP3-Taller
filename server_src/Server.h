@@ -1,15 +1,17 @@
+#ifndef __SERVER_H
+#define __SERVER_H
+
 #include "../common_src/Socket.h"
 #include "../common_src/Thread.h"
 #include <map>
+#include <mutex>
+#include <vector>
+#include "Resources.h"
 
 class Server: public Thread{
 	Socket skt;
-	bool must_reap;
-	std::map<std::string, std::string> recursos;
-	std::mutex m;
-	std::vector<*Peer> peers;
-
-	void _reap();
+	bool accepting_connections;
+	Resources resources;
 
 	public:
 		Server(const char* port, const char* root_file);
@@ -18,7 +20,7 @@ class Server: public Thread{
 
 		void write_resource(std::string resource, std::string value);
 
-		std::string read_resourse(std::string resource);
+		std::string read_resource(std::string resource);
 
 		void operator()();
 
@@ -26,3 +28,4 @@ class Server: public Thread{
 
 		~Server();
 };
+#endif

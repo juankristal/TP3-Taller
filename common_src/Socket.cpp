@@ -8,16 +8,17 @@
 #include <errno.h>
 #include <stdio.h>
 #include <cstring>
+#include <iostream>
 
-#define ACTIVO 1
-#define PASIVO 0
+#define ACTIVO 0
+#define PASIVO 1
 #define ACCEPT_QUEUE_LEN 10
 
-#define MSG_ERR_CONNECT "Error en la conexion del socket"
-#define MSG_ERR_BL "Error el bind del socket"
-#define MSG_ERR_ACCEPT "Error al aceptar una conexion"
-#define MSG_ERR_SEND "Error al enviar por socket"
-#define MSG_ERR_RECV "Error al recibir por socket"
+#define MSG_ERR_CONNECT "Error en la conexion del socket\n\n"
+#define MSG_ERR_BL "Error el bind del socket\n\n"
+#define MSG_ERR_ACCEPT "Error al aceptar una conexion\n\n"
+#define MSG_ERR_SEND "Error al enviar por socket\n\n"
+#define MSG_ERR_RECV "Error al recibir por socket\n\n"
 
 int Socket::send_all(std::string &msg, size_t size){
 	size_t total_sent = 0;
@@ -48,7 +49,9 @@ void Socket::_getaddrinfo(const char* host, const char* port,
 	hints.ai_family = AF_INET;
 	hints.ai_socktype = SOCK_STREAM;
 	hints.ai_flags = is_passive ? AI_PASSIVE : 0;
-	if (getaddrinfo(host, port, &hints, server_info)) throw NetworkError(MSG_ERR_CONNECT);
+	if (getaddrinfo(host, port, &hints, server_info)){
+		throw NetworkError(MSG_ERR_CONNECT);
+	}
 }
 
 void Socket::connect_to_available_server(const char* host, const char* port,
@@ -91,14 +94,19 @@ Socket::Socket(const char* port):
 	_bind_and_listen(port);
 }
 
+Socket::Socket(int fd):
+	fd(fd),
+	is_passive(false){}
+
+
 int Socket::send_message(std::string mensaje, size_t tamanio){
 	return this->send_all(mensaje, tamanio);
 }
 
-void Socket::accept_connection(Socket& other){
+Socket Socket::accept_connection(){
 	int fd = accept(this->fd, NULL, NULL);
 	if (fd) throw NetworkError(MSG_ERR_ACCEPT);
-	other.fd = fd;
+	return Socket(fd);
 }
 
 int Socket::receive_message(std::string buffer, size_t tamanio){
@@ -117,6 +125,8 @@ Socket& Socket::operator=(Socket&& other) {
 }
 
 Socket::~Socket(){
-	shutdown(this->fd, SHUT_RDWR);
-	close(this->fd);
+	if (this->fd != -1){
+		shutdown(this->fd, SHUT_RDWR);
+		close(this->fd);
+	}
 }

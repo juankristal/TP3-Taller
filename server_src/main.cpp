@@ -1,5 +1,6 @@
 #include "Server.h"
 #include <iostream>
+#include <stdio.h>
 #include "../common_src/NetworkError.h"
 
 #define ARGV_LENGHT 3
@@ -9,14 +10,15 @@
 int main(int argc, char const *argv[]){
 
 	if (argc != ARGV_LENGHT) return -1;
+	int status = 0;
 	try {
 		Server server(argv[PORT], argv[ROOT_FILE]);
 		server();
-		while(std::cin.getline() != 'q'){}
+		while(getchar() != 'q'){}
 		server.shutdown();
-		return 0;
 	} catch (NetworkError &e) {
 		std::cerr << e.what();
-		return 1;
+		status = 1;
 	}
+	return status;
 }

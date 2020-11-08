@@ -1,3 +1,5 @@
+#ifndef __THREAD_H
+#define __THREAD_H
 #include <thread>
 
 class Thread {
@@ -21,3 +23,4 @@ class Thread {
 
         Thread& operator=(Thread&& other);
 };
+#endif

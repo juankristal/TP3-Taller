@@ -10,8 +10,8 @@ int main(int argc, char const *argv[]){
 
 	if (argc != ARGV_LENGHT) return -1;
 
-	Client client(argv[IP], argv[PORT]);
 	try {
+		Client client(argv[IP], argv[PORT]);
 		client();
 	} catch (NetworkError &e){
 		std::cerr << e.what();

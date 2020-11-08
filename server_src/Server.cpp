@@ -1,53 +1,44 @@
 #include "Server.h"
-#include "Peer.h"
+#include "Worker.h"
+#include <sstream>
+#include <fstream>
 
-Server::Server(char* port, char* root_file):
+Server::Server(const char* port, const char* root_file):
 	skt(port),
-	must_reap(false){
+	accepting_connections(true){
 		std::stringstream ss;
 		std::ifstream input(root_file);
 		while(input >> ss.rdbuf()){}
-		map[root_file] = ss.str();
-}
-
-void _reap(){
-	std::unique_lock<std::mutex> lock(this->m);
-	this->must_reap = false;
+		this->resources.write_resource(std::string("/"), ss.str());
+		this->start();
 }
 
 void Server::run(){
-	this();
+	std::vector<Worker*> workers;
+	Resources resources;
+	while(accepting_connections){
+
+		workers.push_back(new Worker(this->skt.accept_connection(), resources));
+		for (size_t i = 0; i < workers.size(); i++){
+			if (workers[i]->isDead()){
+				workers[i]->join();
+				delete workers[i];
+			}
+		}
+	}
+	for (size_t i = 0; i < workers.size(); i++){
+		workers[i]->join();
+		delete workers[i];
+	}
 }
 
 void Server::operator()(){
-
-	while(accepting_connections){
-
-		// realizar manejo de peer
-		if (must_reap){
-			_reap();
-		}
-	}
-
-	for (int i = 0; i < peers.size(); i++){
-		peers[i]->join();
-		delete peers[i];
-	}
-}
-
-void Server::write_resource(std::string resourse, std::string value){
-	std::unique_lock<std::mutex> lock(this->m);
-	map[resourse] = value;
-}
-
-std::string Server::read_resource(std::string resourse){
-	std::unique_lock<std::mutex> lock(this->m);
-	return map[resourse];
+	this->run();
 }
 
 void Server::shutdown(){
 	this->accepting_connections = false;
-	this.join()
+	this->join();
 }
 
 Server::~Server(){}

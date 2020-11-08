@@ -1,3 +1,6 @@
+#ifndef __SOCKET_H
+#define __SOCKET_H
+
 #include <stddef.h>
 #include <string>
 
@@ -14,6 +17,7 @@ class Socket{
 											bool is_active, bool is_binded);
 		void _connect(const char* host, const char* port);
 		void _bind_and_listen(const char* port);
+		explicit Socket(int fd);
 
 	public:
 		Socket(const char* host, const char* port);
@@ -28,7 +32,7 @@ class Socket{
 		/*	Recibe un socket y acepta una conexion vinculando a other a dicha conexion.
 		Devuelve -1 en caso de error. */
 
-		void accept_connection(Socket &other);
+		Socket accept_connection();
 
 		/*	Recibe un tamanio cantidad de bytes y los almacena en un buffer recibido por parametro.
 		Devuelve la cantidad de bytes recibidos o bien -1 si hay un error. */
@@ -45,3 +49,4 @@ class Socket{
 		Socket(Socket&& other);
     	Socket& operator=(Socket&& other);
 };
+#endif
