@@ -20,7 +20,7 @@ std::string HTTPRequestParser::getResource(){
 std::string HTTPRequestParser::getBody(){
 	size_t pos = this->text.find("\n\n");
 	if (pos == std::string::npos) return "";
-	return this->text.substr(pos + 1);
+	return this->text.substr(pos + 2);
 }
 
 std::string HTTPRequestParser::getFirstLine(){

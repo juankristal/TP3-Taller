@@ -35,11 +35,12 @@ std::string Worker::procesar_request(std::string command, std::string resource, 
 		this->resources.write_resource(resource, body);
 		return std::string(HTTP402) + body;
 	}
-	return std::string(HTTP402) + this->resources.read_resource(resource);
+	std::string read = this->resources.read_resource(resource);
+	if (read == "") return std::string(HTTP404);
+	return std::string(HTTP402) + read;
 }
 
 void Worker::run(){
-	std::cout << "Empezando a recibir\n";
 	std::string s = this->skt.receive_message();
 	HTTPRequestParser parser(s);
 	std::cout << parser.getFirstLine();
