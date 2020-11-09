@@ -8,18 +8,16 @@
 
 class Worker: public Thread{
 
-	Socket &skt;
+	Socket skt;
 	std::atomic<bool> mIsDead;
 	Resources &resources;
 	void send_message(std::string msg);
 	std::string procesar_request(std::string command,
-											std::string resource, std::string body);
+								std::string resource, std::string body);
 
 	public:
 
 		Worker(Socket skt, Resources &resources);
-
-		void operator()();
 
 		void run();
 

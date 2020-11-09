@@ -17,9 +17,9 @@ void Client::operator()(){
 											buffer.size() - i : CHUNK_SIZE);
 		i += CHUNK_SIZE;
 	}
-	while (this->skt.receive_message(buffer, CHUNK_SIZE)){
-		std::cout << buffer;
-	}
+	this->skt.kill_channel("w");
+	std::cout << "Send done\n";
+	std::cout << this->skt.receive_message();
 }
 
 Client::~Client(){}

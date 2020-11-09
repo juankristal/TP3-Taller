@@ -11,13 +11,11 @@
 #define HTTP402 "HTTP 200 OK\n\n"
 
 Worker::Worker(Socket skt, Resources &resources):
-	skt(skt),
+	skt(std::move(skt)),
 	mIsDead(false),
-	resources(resources){}
-
-void Worker::operator()(){
-	this->run();
-}
+	resources(resources){
+		this->start();
+	}
 
 void Worker::send_message(std::string msg){
 	size_t i = 0;
@@ -41,16 +39,15 @@ std::string Worker::procesar_request(std::string command, std::string resource, 
 }
 
 void Worker::run(){
-	std::stringstream ss;
-	std::string s;
-	while(this->skt.receive_message(s, CHUNK_SIZE)){
-		ss << s;
-	}
-	HTTPRequestParser parser(ss.str());
+	std::cout << "Empezando a recibir\n";
+	std::string s = this->skt.receive_message();
+	HTTPRequestParser parser(s);
 	std::cout << parser.getFirstLine();
-	send_message(procesar_request(parser.getCommand(),
-									parser.getResource(),
-									parser.getBody()));
+	send_message("Recibido brother\n");
+	//send_message(procesar_request(parser.getCommand(),
+	//								parser.getResource(),
+	//								parser.getBody()));
+	this->skt.kill_channel("w");
 	this->mIsDead = true;
 }
 

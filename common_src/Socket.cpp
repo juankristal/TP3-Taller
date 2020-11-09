@@ -8,17 +8,22 @@
 #include <errno.h>
 #include <stdio.h>
 #include <cstring>
+#include <sstream>
 #include <iostream>
 
-#define ACTIVO 0
-#define PASIVO 1
+#define ACTIVO 1
+#define PASIVO 0
 #define ACCEPT_QUEUE_LEN 10
+#define CHUNK_SIZE 64
 
 #define MSG_ERR_CONNECT "Error en la conexion del socket\n\n"
 #define MSG_ERR_BL "Error el bind del socket\n\n"
 #define MSG_ERR_ACCEPT "Error al aceptar una conexion\n\n"
 #define MSG_ERR_SEND "Error al enviar por socket\n\n"
 #define MSG_ERR_RECV "Error al recibir por socket\n\n"
+#define MSG_ERR_BIND "Error en el bind del socket\n\n"
+#define MSG_ERR_LISTEN "Error en el listen del socket\n\n"
+#define MSG_ERR_SETSOCKOPT "Error en el setsockopt\n\n"
 
 int Socket::send_all(std::string &msg, size_t size){
 	size_t total_sent = 0;
@@ -30,16 +35,16 @@ int Socket::send_all(std::string &msg, size_t size){
 	return total_sent;
 }
 
-int Socket::receive_all(std::string &buffer, size_t size){
-	size_t total_received = 0;
-	while (total_received < size){
-		int received = recv(this->fd, &buffer[total_received],
-							size - total_received, 0);
+std::string Socket::receive_all(){
+	int received = 1;
+	char buffer[CHUNK_SIZE];
+	std::stringstream ss;
+	while (received){
+		received = recv(this->fd, buffer, CHUNK_SIZE, 0);
 		if (received < 0) throw NetworkError(MSG_ERR_RECV);
-		if (received == 0) break;
-		total_received += received;
+		for (int i = 0; i < received; i++) ss << buffer[i];
 	}
-	return total_received;
+	return ss.str();
 }
 
 void Socket::_getaddrinfo(const char* host, const char* port,
@@ -54,16 +59,31 @@ void Socket::_getaddrinfo(const char* host, const char* port,
 	}
 }
 
-void Socket::connect_to_available_server(const char* host, const char* port,
-											bool is_active, bool is_binded) {
-	struct addrinfo* server_info;
+void Socket::bind_to_available_port(const char* host, const char* port,
+											bool is_active) {
+	struct addrinfo *server_info, *server;
 	this->_getaddrinfo(host, port, &server_info, is_active);
-	struct addrinfo* server = server_info->ai_next;
-	for (; server != NULL; server = server_info->ai_next) {
+	for (server = server_info; server != NULL; server = server->ai_next) {
+		this->fd = socket(server->ai_family, server->ai_socktype, server->ai_protocol);
+		std::cout << this->fd << "\n";
+		if (this->fd == -1) continue;
+		if (bind(this->fd, server->ai_addr, server->ai_addrlen) == 0){
+			freeaddrinfo(server_info);
+			return;
+		}
+	}
+	freeaddrinfo(server_info);
+	throw NetworkError(MSG_ERR_BIND);	
+}
+
+void Socket::connect_to_available_server(const char* host, const char* port,
+											bool is_active) {
+	struct addrinfo *server_info, *server;
+	this->_getaddrinfo(host, port, &server_info, is_active);
+	for (server = server_info; server != NULL; server = server->ai_next) {
 		this->fd = socket(server->ai_family, server->ai_socktype, server->ai_protocol);
 		if (this->fd == -1) continue;
-		if (connect(this->fd, server->ai_addr, server->ai_addrlen) == 0) {
-			if (is_binded) bind(this->fd, server->ai_addr, server->ai_addrlen);
+		if (connect(this->fd, server->ai_addr, server->ai_addrlen) == 0){
 			freeaddrinfo(server_info);
 			return;
 		}
@@ -73,30 +93,27 @@ void Socket::connect_to_available_server(const char* host, const char* port,
 }
 
 void Socket::_connect(const char* host, const char* port){
-	this->connect_to_available_server(host, port, ACTIVO, false);
+	this->connect_to_available_server(host, port, ACTIVO);
 }
 
 void Socket::_bind_and_listen(const char* port) {
-	this->connect_to_available_server(NULL, port, PASIVO, true);
+	this->bind_to_available_port(NULL, port, PASIVO);
 	int val = 1;
 	if(setsockopt(this->fd, SOL_SOCKET, SO_REUSEADDR, &val, sizeof(val)))
-		throw NetworkError(MSG_ERR_BL);
-	listen(this->fd, ACCEPT_QUEUE_LEN);
+		throw NetworkError(MSG_ERR_SETSOCKOPT);
+	if(listen(this->fd, ACCEPT_QUEUE_LEN)) throw NetworkError(MSG_ERR_LISTEN);
 }
 
-Socket::Socket(const char* host, const char* port):
-	is_passive(false){
+Socket::Socket(const char* host, const char* port){
 	_connect(host, port);
 }
 
-Socket::Socket(const char* port):
-	is_passive(true){
-	_bind_and_listen(port);
+Socket::Socket(const char* port){
+		_bind_and_listen(port);
 }
 
 Socket::Socket(int fd):
-	fd(fd),
-	is_passive(false){}
+	fd(fd){}
 
 
 int Socket::send_message(std::string mensaje, size_t tamanio){
@@ -105,23 +122,33 @@ int Socket::send_message(std::string mensaje, size_t tamanio){
 
 Socket Socket::accept_connection(){
 	int fd = accept(this->fd, NULL, NULL);
-	if (fd) throw NetworkError(MSG_ERR_ACCEPT);
+	if (fd == -1) throw NetworkError(MSG_ERR_ACCEPT);
 	return Socket(fd);
 }
 
-int Socket::receive_message(std::string buffer, size_t tamanio){
-	return this->receive_all(buffer, tamanio);
+std::string Socket::receive_message(){
+	return this->receive_all();
 }
 
 Socket::Socket(Socket&& other) {
     this->fd = std::move(other.fd);
-    this->is_passive = std::move(other.is_passive);
+    other.fd = -1;
 }
 
 Socket& Socket::operator=(Socket&& other) {
     this->fd = std::move(other.fd);
-    this->is_passive = std::move(other.is_passive);
     return *this;
+}
+
+void Socket::kill_channel(const std::string &t){
+	if (t == "r") shutdown(this->fd, SHUT_RD);
+	if (t == "w") shutdown(this->fd, SHUT_WR);
+}
+
+void Socket::force_shutdown(){
+	shutdown(this->fd, SHUT_RDWR);
+	close(this->fd);
+	this->fd = -1;
 }
 
 Socket::~Socket(){

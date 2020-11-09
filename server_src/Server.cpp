@@ -1,5 +1,6 @@
 #include "Server.h"
 #include "Worker.h"
+#include "../common_src/NetworkError.h"
 #include <sstream>
 #include <fstream>
 
@@ -10,7 +11,19 @@ Server::Server(const char* port, const char* root_file):
 		std::ifstream input(root_file);
 		while(input >> ss.rdbuf()){}
 		this->resources.write_resource(std::string("/"), ss.str());
-		this->start();
+}
+
+void _reap(std::vector<Worker*> workers){
+    std::vector<Worker*>::iterator it = workers.begin();
+    while (it != workers.end()) {
+        if ((*it)->isDead()) {
+            (*it)->join();
+            delete (*it);
+            it = workers.erase(it);
+        } else {
+            ++it;
+        }
+    }
 }
 
 void Server::run(){
@@ -18,13 +31,13 @@ void Server::run(){
 	Resources resources;
 	while(accepting_connections){
 
-		workers.push_back(new Worker(this->skt.accept_connection(), resources));
-		for (size_t i = 0; i < workers.size(); i++){
-			if (workers[i]->isDead()){
-				workers[i]->join();
-				delete workers[i];
-			}
+		try {
+			Socket peer = std::move(this->skt.accept_connection());
+			workers.push_back(new Worker(std::move(peer), resources));
+		} catch (const NetworkError &e) {	
+			continue;
 		}
+		_reap(workers);
 	}
 	for (size_t i = 0; i < workers.size(); i++){
 		workers[i]->join();
@@ -33,12 +46,12 @@ void Server::run(){
 }
 
 void Server::operator()(){
-	this->run();
+	this->start();
 }
 
 void Server::shutdown(){
 	this->accepting_connections = false;
-	this->join();
+	this->skt.force_shutdown();
 }
 
 Server::~Server(){}
