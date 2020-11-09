@@ -4,7 +4,7 @@ class HTTPRequestParser{
 	std::string text;
 
 	public:
-		HTTPRequestParser(std::string text);
+		HTTPRequestParser(std::string &text);
 
 		std::string getCommand();
 		std::string getResource();

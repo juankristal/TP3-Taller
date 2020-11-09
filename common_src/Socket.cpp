@@ -40,7 +40,7 @@ std::string Socket::receive_all(){
 	char buffer[CHUNK_SIZE];
 	std::stringstream ss;
 	while (received){
-		received = recv(this->fd, buffer, CHUNK_SIZE, 0);
+		received = recv(this->fd, buffer, CHUNK_SIZE, 0);\
 		if (received < 0) throw NetworkError(MSG_ERR_RECV);
 		for (int i = 0; i < received; i++) ss << buffer[i];
 	}
@@ -65,7 +65,6 @@ void Socket::bind_to_available_port(const char* host, const char* port,
 	this->_getaddrinfo(host, port, &server_info, is_active);
 	for (server = server_info; server != NULL; server = server->ai_next) {
 		this->fd = socket(server->ai_family, server->ai_socktype, server->ai_protocol);
-		std::cout << this->fd << "\n";
 		if (this->fd == -1) continue;
 		if (bind(this->fd, server->ai_addr, server->ai_addrlen) == 0){
 			freeaddrinfo(server_info);

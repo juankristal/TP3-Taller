@@ -43,10 +43,10 @@ void Worker::run(){
 	std::string s = this->skt.receive_message();
 	HTTPRequestParser parser(s);
 	std::cout << parser.getFirstLine();
-	send_message("Recibido brother\n");
-	//send_message(procesar_request(parser.getCommand(),
-	//								parser.getResource(),
-	//								parser.getBody()));
+	std::cout.flush();
+	send_message(procesar_request(parser.getCommand(),
+									parser.getResource(),
+									parser.getBody()));
 	this->skt.kill_channel("w");
 	this->mIsDead = true;
 }

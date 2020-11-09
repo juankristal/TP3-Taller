@@ -12,7 +12,7 @@ class Resources{
 	public:
 		Resources();
 
-		void write_resource(std::string resourse, std::string value);
+		void write_resource(std::string resourse, std::string &value);
 		std::string read_resource(std::string resourse);
 
 		~Resources();

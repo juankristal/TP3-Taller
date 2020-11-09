@@ -3,6 +3,7 @@
 #include "../common_src/NetworkError.h"
 #include <sstream>
 #include <fstream>
+#include <iostream>
 
 Server::Server(const char* port, const char* root_file):
 	skt(port),
@@ -10,10 +11,11 @@ Server::Server(const char* port, const char* root_file):
 		std::stringstream ss;
 		std::ifstream input(root_file);
 		while(input >> ss.rdbuf()){}
-		this->resources.write_resource(std::string("/"), ss.str());
+		std::string s = ss.str();
+		this->resources.write_resource(std::string("/"), s);
 }
 
-void _reap(std::vector<Worker*> workers){
+void _reap(std::vector<Worker*> &workers){
     std::vector<Worker*>::iterator it = workers.begin();
     while (it != workers.end()) {
         if ((*it)->isDead()) {

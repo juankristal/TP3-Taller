@@ -18,7 +18,6 @@ void Client::operator()(){
 		i += CHUNK_SIZE;
 	}
 	this->skt.kill_channel("w");
-	std::cout << "Send done\n";
 	std::cout << this->skt.receive_message();
 }
 

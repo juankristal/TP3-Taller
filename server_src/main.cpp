@@ -19,7 +19,6 @@ int main(int argc, char const *argv[]){
 		std::string c;
 		while(c != EXIT_CHAR){
 			std::getline(std::cin, c);
-			std::cout << c;
 		}
 		server.shutdown();
 		server.join();
