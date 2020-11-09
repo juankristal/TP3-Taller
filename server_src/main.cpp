@@ -10,7 +10,6 @@
 #define EXIT_CHAR "q"
 
 int main(int argc, char const *argv[]){
-
 	if (argc != ARGV_LENGHT) return -1;
 	int status = 0;
 	try {

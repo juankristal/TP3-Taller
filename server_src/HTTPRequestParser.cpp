@@ -1,7 +1,7 @@
 #include "HTTPRequestParser.h"
 #include <iostream>
 
-HTTPRequestParser::HTTPRequestParser(std::string &text):
+HTTPRequestParser::HTTPRequestParser(const std::string &text):
 	text(text){}
 
 std::string HTTPRequestParser::getCommand(){
@@ -24,7 +24,7 @@ std::string HTTPRequestParser::getBody(){
 }
 
 std::string HTTPRequestParser::getFirstLine(){
-	return this->text.substr(0, this->text.find("\n"));
+	return this->text.substr(0, this->text.find("\n") + 1);
 }
 
 HTTPRequestParser::~HTTPRequestParser(){}

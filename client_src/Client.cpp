@@ -1,6 +1,7 @@
 #include "Client.h"
 #include <iostream>
 #include <sstream>
+#include <string>
 
 #define CHUNK_SIZE 64
 

@@ -8,5 +8,5 @@ class NetworkError : public std::exception {
    public:
     explicit NetworkError(const char* fmt, ...) noexcept;
     virtual const char* what() const noexcept;
-    virtual ~NetworkError() noexcept {}
+    virtual ~NetworkError() noexcept;
 };

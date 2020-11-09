@@ -64,7 +64,8 @@ void Socket::bind_to_available_port(const char* host, const char* port,
 	struct addrinfo *server_info, *server;
 	this->_getaddrinfo(host, port, &server_info, is_active);
 	for (server = server_info; server != NULL; server = server->ai_next) {
-		this->fd = socket(server->ai_family, server->ai_socktype, server->ai_protocol);
+		this->fd = socket(server->ai_family, server->ai_socktype,
+							server->ai_protocol);
 		if (this->fd == -1) continue;
 		if (bind(this->fd, server->ai_addr, server->ai_addrlen) == 0){
 			freeaddrinfo(server_info);
@@ -80,7 +81,8 @@ void Socket::connect_to_available_server(const char* host, const char* port,
 	struct addrinfo *server_info, *server;
 	this->_getaddrinfo(host, port, &server_info, is_active);
 	for (server = server_info; server != NULL; server = server->ai_next) {
-		this->fd = socket(server->ai_family, server->ai_socktype, server->ai_protocol);
+		this->fd = socket(server->ai_family, server->ai_socktype,
+							server->ai_protocol);
 		if (this->fd == -1) continue;
 		if (connect(this->fd, server->ai_addr, server->ai_addrlen) == 0){
 			freeaddrinfo(server_info);

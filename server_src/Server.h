@@ -6,6 +6,7 @@
 #include <map>
 #include <mutex>
 #include <vector>
+#include <string>
 #include "Resources.h"
 
 class Server: public Thread{
@@ -16,7 +17,7 @@ class Server: public Thread{
 	public:
 		Server(const char* port, const char* root_file);
 
-		void run();
+		void run() override;
 
 		void write_resource(std::string resource, std::string value);
 

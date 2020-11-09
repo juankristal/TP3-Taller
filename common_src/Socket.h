@@ -5,7 +5,6 @@
 #include <string>
 
 class Socket{
-
 	private:
 		int fd;
 		int send_all(std::string &msg, size_t size);

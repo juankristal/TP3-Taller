@@ -4,6 +4,7 @@
 #include <sstream>
 #include <fstream>
 #include <iostream>
+#include <utility>
 
 Server::Server(const char* port, const char* root_file):
 	skt(port),
@@ -30,7 +31,6 @@ void _reap(std::vector<Worker*> &workers){
 void Server::run(){
 	std::vector<Worker*> workers;
 	while(accepting_connections){
-
 		try {
 			Socket peer = std::move(this->skt.accept_connection());
 			workers.push_back(new Worker(std::move(peer), resources));

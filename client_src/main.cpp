@@ -7,7 +7,6 @@
 #define PORT 2
 
 int main(int argc, char const *argv[]){
-
 	if (argc != ARGV_LENGHT) return -1;
 
 	try {
