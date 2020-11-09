@@ -11,8 +11,7 @@ Server::Server(const char* port, const char* root_file):
 		std::stringstream ss;
 		std::ifstream input(root_file);
 		while(input >> ss.rdbuf()){}
-		std::string s = ss.str();
-		this->resources.write_resource(std::string("/"), s);
+		this->resources.write_resource(std::string("/"), ss.str());
 }
 
 void _reap(std::vector<Worker*> &workers){

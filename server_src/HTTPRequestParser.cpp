@@ -12,13 +12,15 @@ std::string HTTPRequestParser::getResource(){
 	size_t first_space_pos = this->text.find(' ') + 1;
 	size_t second_space_pos = this->text.find(' ', first_space_pos);
 	size_t size = second_space_pos - first_space_pos;
-	return this->text.substr(this->text.find('/'), size);
+	size_t command_pos = this->text.find('/');
+	if (command_pos == std::string::npos) return "";
+	return this->text.substr(command_pos, size);
 }
 
 std::string HTTPRequestParser::getBody(){
 	size_t pos = this->text.find("\n\n");
 	if (pos == std::string::npos) return "";
-	return this->text.substr(pos);
+	return this->text.substr(pos + 1);
 }
 
 std::string HTTPRequestParser::getFirstLine(){
