@@ -6,6 +6,8 @@ class Client{
 	public:
 		Client(const char* ip, const char* port);
 
+	    /* Envia un mensaje desde stdin por Socket al servidor e
+		imprime la respuesta del mismo por stdout.*/
 		void operator()();
 
 		~Client();

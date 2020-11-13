@@ -25,25 +25,26 @@ class Socket{
 		explicit Socket(const char* port);
 
 	    /*	Envia tamanio cantidad de bytes de un mensaje recibido por parametro.
-		Devuelve -1 en caso de error. */
+		En caso de error levanta NetworkError. */
 
 		int send_message(std::string mensaje, size_t tamanio);
 
-		/*	Recibe un socket y acepta una conexion vinculando a other a dicha conexion.
-		Devuelve -1 en caso de error. */
+		/*	Intenta aceptar una conexion. Se devuelve el socket generado en caso de aceptarse.
+		En caso de error levanta NetworkError. */
 
 		Socket accept_connection();
 
-		/*	Recibe un tamanio cantidad de bytes y los almacena en un buffer recibido por parametro.
-		Devuelve la cantidad de bytes recibidos o bien -1 si hay un error. */
+		/* Recibe un mensaje hasta que se corte la comunicacion y lo devuelve.
+		En caso de error levanta NetworkError. */
 
 		std::string receive_message();
 
 		/*	Desconecta el socket de su direccion vinculada.
-		Devuelve -1 en caso de error.  */
+		En caso de error levanta NetworkError. */
 
 		void kill_channel(const std::string &t);
 
+	    /* Se hace shutdown a ambos canales de comunicacion y cierra el socket. */
 		void force_shutdown();
 
 		~Socket();

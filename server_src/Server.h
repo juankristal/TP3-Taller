@@ -17,10 +17,14 @@ class Server: public Thread{
 	public:
 		Server(const char* port, const char* root_file);
 
+		/* Acepta conexiones a clientes de forma concurrente
+		y las ejecuta */
 		void run() override;
 
 		void operator()();
 
+		/* Apaga al servidor. El servidor no se termina de apagar
+		hasta que terminen de ejecutarse los clientes remanentes */
 		void shutdown();
 
 		~Server();

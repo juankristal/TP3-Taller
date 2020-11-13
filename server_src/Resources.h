@@ -12,7 +12,10 @@ class Resources{
 	public:
 		Resources();
 
+		/* Escribe value en el resource correspondiente */
 		void write_resource(std::string resource, std::string value);
+
+		/* Devuelve el valor asignado al recurso recibido */
 		std::string read_resource(std::string resource);
 
 		~Resources();
