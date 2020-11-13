@@ -19,10 +19,6 @@ class Server: public Thread{
 
 		void run() override;
 
-		void write_resource(std::string resource, std::string value);
-
-		std::string read_resource(std::string resource);
-
 		void operator()();
 
 		void shutdown();
